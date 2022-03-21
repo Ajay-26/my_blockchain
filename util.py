@@ -10,3 +10,7 @@ def find_user(blockchain, uid):
 			return user
 	print("User corresponding to user id - {uid} not found, returning none".format(uid = uid))
 	return None
+
+def make_transaction_list_elt(transaction):
+	#Converts a transaction to string sender, recipient, amount
+	return ":{sender}, {recipient}, {amount}:".format(sender=transaction.sender, recipient=transaction.recipient, amount=str(transaction.amount))
