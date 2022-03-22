@@ -14,7 +14,7 @@ class Transaction:
 		self.amount = amount
 
 class Block:
-	def __init__(self, prev_block_hash, transaction_list, test_bits = 2, num_transactions = 1):
+	def __init__(self, prev_block_hash, transaction_list, test_bits = 2, num_transactions = 2):
 		self.prev_block_hash = prev_block_hash
 		self.transaction_list = transaction_list
 		self.nonce = 0
@@ -33,7 +33,7 @@ class Block:
 
 	def add_transaction(self, transaction):
 		if(len(self.transaction_list) + 1 >= self.num_transactions):
-			print("Transaction Limit reached, please create a new block")
+			print("Transaction Limit reached, creating new block")
 			return 0
 		else:
 			self.transaction_list.append(make_transaction_list_elt(transaction))
@@ -50,9 +50,10 @@ class Block:
 		return 
 
 class User:
-	def __init__(self,name, starting_amount = 100):
+	def __init__(self,name,password = "abc", starting_amount = 100):
 		self.user_id = str(uuid.uuid4())
 		self.name = name
+		self.password = password
 		self.balance = starting_amount
 
 	def change_name(self,new_name):
@@ -69,10 +70,10 @@ class BlockChain(Block):
 		self.chain = []
 		self.users = []
 
-	def add_user(self, new_username):
-		new_user = User(new_username)
+	def add_user(self, new_username, new_password = 'abc'):
+		new_user = User(new_username,new_password)
 		self.users.append(new_user)
-		return
+		return new_user.user_id
 
 	def add_block(self, transaction_list):
 		if len(self.chain) == 0:
@@ -98,6 +99,7 @@ class BlockChain(Block):
 			return
 
 	def make_payment(self, user_id1, user_id2, amount):
+		#Make user_id1 pay user_id2 amount coins
 		user1 = find_user(self,user_id1)
 		user2 = find_user(self,user_id2)
 		user1.make_transaction(self,user_id2,amount)
