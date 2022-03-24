@@ -24,8 +24,11 @@ def display_account(user):
 		uid = user
 		print("Reached Here")
 		user = find_user(blockchain,user)
+		print(user.balance)
 		if(request.form['username'] == user.name and hashlib.sha256(request.form['password'].encode()).hexdigest() == user.password):
-			return jsonify({'code':200, 'Message': 'Username = {u_name}, Coins in account = {acct}'.format(u_name=  user.name, acct = str(user.balance))}) 
+			data = {"username" : user.name, "balance" : str(user.balance), "payment_link" : str(request.url) + '/pay'}
+			return render_template('account.html', data=data)
+			#return jsonify({'code':200, 'Message': 'Username = {u_name}, Coins in account = {acct}'.format(u_name=  user.name, acct = str(user.balance))}) 
 		else:
 			return jsonify({"Error":"Invalid Login"})
 

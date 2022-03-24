@@ -14,7 +14,7 @@ class Transaction:
 		self.amount = amount
 
 class Block:
-	def __init__(self, prev_block_hash, transaction_list, test_bits = 2, num_transactions = 2):
+	def __init__(self, prev_block_hash, transaction_list, test_bits = 2, num_transactions = 2, mine_limit = 10000000):
 		self.prev_block_hash = prev_block_hash
 		self.transaction_list = transaction_list
 		self.nonce = 0
@@ -22,7 +22,8 @@ class Block:
 		self.block_data = " - ".join((self.transaction_list)) + self.prev_block_hash
 		self.test_bits = test_bits
 		self.num_transactions = num_transactions
-		#self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
+		self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
+		self.mine_limit = mine_limit
 
 	def test_condition(self, input_digest):
 		#Check if the initial self.test_bits are all 0s
@@ -39,10 +40,14 @@ class Block:
 			self.transaction_list.append(make_transaction_list_elt(transaction))
 			return 1
 
-	def mine_nonce(self, mine_limit = 1000000):
+	def mine_nonce(self):
+		mine_limit = self.mine_limit
 		for nonce in range(mine_limit):
-			if(self.test_condition(hashlib.sha256((self.block_data + str(nonce)).encode()).hexdigest()) == 1):
+			tmp = hashlib.sha256((self.block_data + str(nonce)).encode()).hexdigest()
+			if(self.test_condition(tmp) == 1):
 				self.nonce = nonce
+				print(tmp)
+				self.block_hash = tmp 
 				return
 			else:
 				pass
@@ -66,9 +71,10 @@ class User:
 		self.balance = self.balance - amount
 
 class BlockChain(Block):
-	def __init__(self):
+	def __init__(self, test_bits=4):
 		self.chain = []
 		self.users = []
+		self.test_bits = test_bits
 
 	def add_user(self, new_username, new_password = 'abc'):
 		new_user = User(new_username,new_password)
@@ -79,8 +85,8 @@ class BlockChain(Block):
 		if len(self.chain) == 0:
 			prev_hash = str(0)
 		else:
-			prev_hash = self.chain[-1].prev_block_hash
-		new_block = Block(prev_hash,transaction_list)
+			prev_hash = str(self.chain[-1].block_hash)
+		new_block = Block(prev_hash,transaction_list,self.test_bits)
 		print("Mining....")
 		new_block.mine_nonce()
 		print("Mining Complete!")
